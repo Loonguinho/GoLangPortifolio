@@ -1,6 +1,6 @@
-# GoLang Portfolio – Tasks Project
+# GoLang Portfolio – To Do App Project
 
-This is a simple To do list using CLI in GoLang.
+This is a simple To Do list using CLI in GoLang.
 
 ## 📁 Project Structure
 
