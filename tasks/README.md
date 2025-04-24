@@ -79,8 +79,6 @@ go mod tidy
 
 ## 🛠️ Future Improvements
 
-- Add unit tests
-- Implement REST API
 - Use a database (e.g., SQLite, PostgreSQL)
 - Add logging and better error handling
 
