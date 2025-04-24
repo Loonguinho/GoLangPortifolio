@@ -1,12 +1,12 @@
-# GoLang Portfolio – To Do App Project
+# GoLang Portfolio – Tasks Project
 
-This is a simple To Do list using CLI in GoLang.
+This is a simple Go application designed to demonstrate structuring a Go project using a modular and clean architecture. It can serve as a learning resource or a starter template for more complex applications.
 
 ## 📁 Project Structure
 
 ```
 tasks/
-├── cmd/        # Application entry points (CLI, server, etc.)
+├── cmd/        # Application commands (CLI entry points)
 ├── config/     # Configuration files and logic
 ├── data/       # Data sources and repositories
 ├── models/     # Data models and structs
@@ -19,7 +19,7 @@ tasks/
 
 ### Prerequisites
 
-- [Go] 1.18 or higher
+- [Go](https://golang.org/dl/) 1.18 or higher
 
 ### Running the Project
 
@@ -31,11 +31,46 @@ cd GoLangPortifolio/tasks
 go run main.go
 ```
 
+## 🧪 Example CLI Usage
+
+You can run the available CLI commands using:
+
+```bash
+go run main.go --help
+```
+
+Example output:
+
+```bash
+A CLI for managing tasks
+
+Usage:
+  tasks [command]
+
+Available Commands:
+  create      Create a new task
+  delete      Delete a task
+  list        List all tasks
+  help        Help about any command
+```
+
+Example: creating a task
+
+```bash
+go run main.go create "Buy groceries"
+```
+
+Example: listing tasks
+
+```bash
+go run main.go list
+```
+
 ## 🧩 Features
 
 - Modular project layout
+- Basic CLI commands (create, list, delete)
 - Configuration management
-- Basic task-related logic (to be customized)
 
 ## 📦 Dependencies
 
@@ -54,11 +89,6 @@ go mod tidy
 - Use a database (e.g., SQLite, PostgreSQL)
 - Add logging and better error handling
 
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
----
 
 Made by [Loonguinho](https://github.com/Loonguinho)
 Inspired by [dreamsofcode-io](https://github.com/dreamsofcode-io)
