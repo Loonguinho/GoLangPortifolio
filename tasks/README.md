@@ -35,10 +35,6 @@ go run main.go
 
 You can run the available CLI commands using:
 
-```bash
-go run main.go --help
-```
-
 Example output:
 
 ```bash
@@ -51,7 +47,6 @@ Available Commands:
   create      Create a new task
   delete      Delete a task
   list        List all tasks
-  help        Help about any command
 ```
 
 Example: creating a task
@@ -60,7 +55,7 @@ Example: creating a task
 go run main.go create "Buy groceries"
 ```
 
-Example: listing tasks
+Example: listing tasks (use '-a' or '--all' to list all tasks)
 
 ```bash
 go run main.go list
@@ -88,7 +83,6 @@ go mod tidy
 - Implement REST API
 - Use a database (e.g., SQLite, PostgreSQL)
 - Add logging and better error handling
-
 
 Made by [Loonguinho](https://github.com/Loonguinho)
 Inspired by [dreamsofcode-io](https://github.com/dreamsofcode-io)
