@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"tasks/config"
+	"todo-list/config"
 
 	"github.com/spf13/cobra"
 )
