@@ -44,7 +44,7 @@ Usage:
   tasks [command]
 
 Available Commands:
-  create      Create a new task
+  add         Create a new task
   delete      Delete a task
   list        List all tasks
 ```
@@ -52,7 +52,7 @@ Available Commands:
 Example: creating a task
 
 ```bash
-go run main.go create "Buy groceries"
+go run main.go add "Buy groceries"
 ```
 
 Example: listing tasks (use '-a' or '--all' to list all tasks)
@@ -64,7 +64,7 @@ go run main.go list
 ## 🧩 Features
 
 - Modular project layout
-- Basic CLI commands (create, list, delete)
+- Basic CLI commands (add, list, delete)
 - Configuration management
 
 ## 📦 Dependencies
