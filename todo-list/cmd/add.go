@@ -4,8 +4,8 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
-	"tasks/config"
 	"time"
+	"todo-list/config"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"

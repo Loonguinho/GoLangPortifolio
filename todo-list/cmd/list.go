@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"tasks/config"
-	"tasks/models"
 	"text/tabwriter"
+	"todo-list/config"
+	"todo-list/models"
 
 	"github.com/mergestat/timediff"
 	"github.com/spf13/cobra"
