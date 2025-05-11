@@ -64,7 +64,13 @@ Endpoints
 
         Example Request:
 
-curl "http://localhost:8080/add?a=5&b=3"
+curl --request POST \
+  --url http://localhost:8080/add \
+  --header 'content-type: application/json' \
+  --data '{
+  "num1": 5,
+  "num2": 3
+}'
 
 Response:
 
@@ -82,7 +88,13 @@ Subtract
 
     Example Request:
 
-curl "http://localhost:8080/subtract?a=5&b=3"
+curl --request POST \
+  --url http://localhost:8080/subtract \
+  --header 'content-type: application/json' \
+  --data '{
+  "num1": 5,
+  "num2": 3
+}'
 
 Response:
 
@@ -100,7 +112,13 @@ Multiply
 
     Example Request:
 
-curl "http://localhost:8080/multiply?a=5&b=3"
+curl --request POST \
+  --url http://localhost:8080/multiply \
+  --header 'content-type: application/json' \
+  --data '{
+  "num1": 5,
+  "num2": 3
+}'
 
 Response:
 
@@ -118,7 +136,13 @@ Divide
 
     Example Request:
 
-curl "http://localhost:8080/divide?a=6&b=3"
+curl --request POST \
+  --url http://localhost:8080/divide \
+  --header 'content-type: application/json' \
+  --data '{
+  "num1": 5,
+  "num2": 0
+}'
 
 Response:
 
