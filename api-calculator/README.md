@@ -1,39 +1,169 @@
-# HTMX Calculator Exercise (Go Backend)
+API Calculator
 
-## Objective
+Welcome to the API Calculator! This project is a simple yet powerful API built with Go that can handle basic arithmetic operations. Whether you're building a calculator app, integrating with other services, or just experimenting with Go, this API will serve as a great foundation.
+🚀 Features
 
-Build a calculator application where:
+    Basic Arithmetic Operations:
 
-- Frontend uses **HTMX** for all interactions (zero custom JavaScript)
-- Backend in **Go** performs all calculations
-- Communication via HTML-over-HTTP
+        Addition
 
-## Backend Requirements (`main.go`)
+        Subtraction
 
-### Endpoints
+        Multiplication
 
-1. `GET /`
-   - Serves static HTML page
-2. `POST /calculate`
-   - Accepts `application/x-www-form-urlencoded`
-   - Processes: `+`, `-`, `*`, `/`
-   - Returns HTML fragments
-3. `GET /history` (Bonus)
-   - Returns calculation history
+        Division
 
-### Must Handle
+        Modulus
 
-- Input validation (numeric, division by zero)
-- Proper HTTP status codes
-- Clean error messages in HTML format
-- Memory-only storage (no DB required)
+    API Endpoints for easy interaction:
 
-## Frontend Requirements (`index.html`)
+        /add : Adds two numbers.
 
-### HTMX Features
+        /subtract : Subtracts the second number from the first.
 
-```html
-<form hx-post="/calculate" hx-target="#result" hx-swap="innerHTML">
-  <!-- Input fields -->
-</form>
-```
+        /multiply : Multiplies two numbers.
+
+        /divide : Divides the first number by the second (with error handling).
+
+        /modulus : Finds the remainder when dividing two numbers.
+
+🛠️ Technologies Used
+
+    Go (Golang) - A statically typed language designed for simplicity and performance.
+
+🔧 Installation
+
+    Clone this repository:
+
+git clone https://github.com/Loonguinho/GoLangPortifolio.git
+
+Navigate to the project directory:
+
+cd GoLangPortifolio/api-calculator
+
+Install the necessary dependencies:
+
+go mod tidy
+
+Run the server:
+
+    go run main.go
+
+    The API will be running at http://localhost:8080.
+
+📡 API Usage
+Endpoints
+
+    Add
+
+        URL: /add
+
+        Method: GET
+
+        Query Params: a (number), b (number)
+
+        Example Request:
+
+curl "http://localhost:8080/add?a=5&b=3"
+
+Response:
+
+    {
+      "result": 8
+    }
+
+Subtract
+
+    URL: /subtract
+
+    Method: GET
+
+    Query Params: a (number), b (number)
+
+    Example Request:
+
+curl "http://localhost:8080/subtract?a=5&b=3"
+
+Response:
+
+    {
+      "result": 2
+    }
+
+Multiply
+
+    URL: /multiply
+
+    Method: GET
+
+    Query Params: a (number), b (number)
+
+    Example Request:
+
+curl "http://localhost:8080/multiply?a=5&b=3"
+
+Response:
+
+    {
+      "result": 15
+    }
+
+Divide
+
+    URL: /divide
+
+    Method: GET
+
+    Query Params: a (number), b (number)
+
+    Example Request:
+
+curl "http://localhost:8080/divide?a=6&b=3"
+
+Response:
+
+    {
+      "result": 2
+    }
+
+Modulus
+
+    URL: /modulus
+
+    Method: GET
+
+    Query Params: a (number), b (number)
+
+    Example Request:
+
+curl "http://localhost:8080/modulus?a=5&b=3"
+
+Response:
+
+        {
+          "result": 2
+        }
+
+🧑‍💻 Development
+
+    Run the server locally:
+
+        Follow the Installation instructions above to get started.
+
+    Test the API:
+
+        Use any tool like curl, Postman, or directly in the browser to hit the endpoints.
+
+    Contributing:
+
+        Contributions are welcome! If you have suggestions, bug fixes, or improvements, feel free to submit a pull request.
+
+💡 Notes
+
+    If you need to deploy this API, consider using Docker to containerize the application.
+
+    The project can be easily extended to include more complex mathematical operations, user authentication, and more.
+
+📜 License
+
+This project is open source and available under the MIT License.
