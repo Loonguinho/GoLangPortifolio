@@ -63,14 +63,15 @@ Endpoints
         Query Params: a (number), b (number)
 
         Example Request:
+            curl --request POST \
+              --url http://localhost:8080/add \
+              --header 'content-type: application/json' \
+              --data '{
+              "num1": 5,
+              "num2": 3
+            }'
+        
 
-curl --request POST \
-  --url http://localhost:8080/add \
-  --header 'content-type: application/json' \
-  --data '{
-  "num1": 5,
-  "num2": 3
-}'
 
 Response:
 
@@ -87,14 +88,14 @@ Subtract
     Query Params: a (number), b (number)
 
     Example Request:
+        curl --request POST \
+          --url http://localhost:8080/subtract \
+          --header 'content-type: application/json' \
+          --data '{
+          "num1": 5,
+          "num2": 3
+        }'
 
-curl --request POST \
-  --url http://localhost:8080/subtract \
-  --header 'content-type: application/json' \
-  --data '{
-  "num1": 5,
-  "num2": 3
-}'
 
 Response:
 
@@ -111,14 +112,14 @@ Multiply
     Query Params: a (number), b (number)
 
     Example Request:
+        curl --request POST \
+          --url http://localhost:8080/multiply \
+          --header 'content-type: application/json' \
+          --data '{
+          "num1": 5,
+          "num2": 3
+        }'
 
-curl --request POST \
-  --url http://localhost:8080/multiply \
-  --header 'content-type: application/json' \
-  --data '{
-  "num1": 5,
-  "num2": 3
-}'
 
 Response:
 
@@ -135,14 +136,14 @@ Divide
     Query Params: a (number), b (number)
 
     Example Request:
+        curl --request POST \
+          --url http://localhost:8080/divide \
+          --header 'content-type: application/json' \
+          --data '{
+          "num1": 5,
+          "num2": 0
+        }'
 
-curl --request POST \
-  --url http://localhost:8080/divide \
-  --header 'content-type: application/json' \
-  --data '{
-  "num1": 5,
-  "num2": 0
-}'
 
 Response:
 
