@@ -1,7 +1,8 @@
-API Calculator
+# API Calculator
 
 Welcome to the API Calculator! This project is a simple yet powerful API built with Go that can handle basic arithmetic operations. Whether you're building a calculator app, integrating with other services, or just experimenting with Go, this API will serve as a great foundation.
-🚀 Features
+
+## 🚀 Features
 
     Basic Arithmetic Operations:
 
@@ -27,11 +28,11 @@ Welcome to the API Calculator! This project is a simple yet powerful API built w
 
         /modulus : Finds the remainder when dividing two numbers.
 
-🛠️ Technologies Used
+## 🛠️ Technologies Used
 
     Go (Golang) - A statically typed language designed for simplicity and performance.
 
-🔧 Installation
+## 🔧 Installation
 
     Clone this repository:
 
@@ -51,7 +52,7 @@ Run the server:
 
     The API will be running at http://localhost:8080.
 
-📡 API Usage
+## 📡 API Usage
 Endpoints
 
     Add
@@ -151,7 +152,7 @@ Response:
       "result": 2.5
     }
 
-🧑‍💻 Development
+## 🧑‍💻 Development
 
     Run the server locally:
 
@@ -165,6 +166,6 @@ Response:
 
         Contributions are welcome! If you have suggestions, bug fixes, or improvements, feel free to submit a pull request.
 
-📜 License
+## 📜 License
 
 This project is open source and available under the MIT License.
