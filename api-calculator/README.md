@@ -151,24 +151,6 @@ Response:
       "result": 2
     }
 
-Modulus
-
-    URL: /modulus
-
-    Method: GET
-
-    Query Params: a (number), b (number)
-
-    Example Request:
-
-curl "http://localhost:8080/modulus?a=5&b=3"
-
-Response:
-
-        {
-          "result": 2
-        }
-
 🧑‍💻 Development
 
     Run the server locally:
@@ -182,12 +164,6 @@ Response:
     Contributing:
 
         Contributions are welcome! If you have suggestions, bug fixes, or improvements, feel free to submit a pull request.
-
-💡 Notes
-
-    If you need to deploy this API, consider using Docker to containerize the application.
-
-    The project can be easily extended to include more complex mathematical operations, user authentication, and more.
 
 📜 License
 
