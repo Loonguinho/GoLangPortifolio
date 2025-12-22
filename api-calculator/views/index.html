@@ -4,70 +4,132 @@
     <meta charset="UTF-8" />
     <title>Go + HTMX Calculator</title>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
     <style>
+      * {
+        box-sizing: border-box;
+      }
+
       body {
-        font-family: sans-serif;
-        padding: 2rem;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        background: #f7f7f7;
+        color: #111;
+        display: flex;
+        justify-content: center;
+        padding: 3rem;
       }
-      .btn {
-        margin-right: 5px;
-        cursor: pointer;
+
+      .calculator {
+        background: #ffffff;
+        border: 1px solid #e5e5e5;
+        border-radius: 10px;
+        padding: 1.5rem;
+        width: 320px;
       }
-      #result {
-        margin-top: 20px;
-        font-weight: bold;
+
+      h1 {
         font-size: 1.2rem;
+        font-weight: 500;
+        margin-bottom: 1.25rem;
+      }
+
+      form {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      input {
+        width: 100%;
+        padding: 0.5rem 0.6rem;
+        font-size: 0.9rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #999;
+      }
+
+      .buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .btn {
+        flex: 1;
+        padding: 0.45rem;
+        font-size: 0.8rem;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+      }
+
+      .btn:hover {
+        background: #f2f2f2;
+      }
+
+      #result {
+        font-size: 0.95rem;
+        font-weight: 500;
+        padding-top: 0.5rem;
+        border-top: 1px solid #eee;
       }
     </style>
   </head>
+
   <body>
-    <h1>HTMX Calculator</h1>
+    <div class="calculator">
+      <h1>HTMX Calculator</h1>
 
-    <form id="calc-form">
-      <label>Number A: <input type="number" name="a" required /></label>
-      <label>Number B: <input type="number" name="b" required /></label>
-    </form>
+      <form id="calc-form">
+        <input type="number" name="a" placeholder="A" required />
+        <input type="number" name="b" placeholder="B" required />
+      </form>
 
-    <br />
+      <div class="buttons">
+        <button
+          class="btn"
+          hx-post="/add"
+          hx-include="#calc-form"
+          hx-target="#result"
+        >
+          +
+        </button>
 
-    <div>
-      <button
-        class="btn"
-        hx-post="/add"
-        hx-include="#calc-form"
-        hx-target="#result"
-      >
-        Add (+)
-      </button>
+        <button
+          class="btn"
+          hx-post="/subtract"
+          hx-include="#calc-form"
+          hx-target="#result"
+        >
+          −
+        </button>
 
-      <button
-        class="btn"
-        hx-post="/subtract"
-        hx-include="#calc-form"
-        hx-target="#result"
-      >
-        Subtract (-)
-      </button>
+        <button
+          class="btn"
+          hx-post="/multiply"
+          hx-include="#calc-form"
+          hx-target="#result"
+        >
+          ×
+        </button>
 
-      <button
-        class="btn"
-        hx-post="/multiply"
-        hx-include="#calc-form"
-        hx-target="#result"
-      >
-        Multiply (*)
-      </button>
+        <button
+          class="btn"
+          hx-post="/divide"
+          hx-include="#calc-form"
+          hx-target="#result"
+        >
+          ÷
+        </button>
+      </div>
 
-      <button
-        class="btn"
-        hx-post="/divide"
-        hx-include="#calc-form"
-        hx-target="#result"
-      >
-        Divide (/)
-      </button>
+      <div id="result">Result will appear here</div>
     </div>
-
-    <div id="result">Result will appear here...</div>
   </body>
 </html>
