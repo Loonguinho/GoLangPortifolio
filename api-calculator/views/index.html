@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Go + HTMX Calculator</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 2rem;
+      }
+      .btn {
+        margin-right: 5px;
+        cursor: pointer;
+      }
+      #result {
+        margin-top: 20px;
+        font-weight: bold;
+        font-size: 1.2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>HTMX Calculator</h1>
+
+    <form id="calc-form">
+      <label>Number A: <input type="number" name="a" required /></label>
+      <label>Number B: <input type="number" name="b" required /></label>
+    </form>
+
+    <br />
+
+    <div>
+      <button
+        class="btn"
+        hx-post="/add"
+        hx-include="#calc-form"
+        hx-target="#result"
+      >
+        Add (+)
+      </button>
+
+      <button
+        class="btn"
+        hx-post="/subtract"
+        hx-include="#calc-form"
+        hx-target="#result"
+      >
+        Subtract (-)
+      </button>
+
+      <button
+        class="btn"
+        hx-post="/multiply"
+        hx-include="#calc-form"
+        hx-target="#result"
+      >
+        Multiply (*)
+      </button>
+
+      <button
+        class="btn"
+        hx-post="/divide"
+        hx-include="#calc-form"
+        hx-target="#result"
+      >
+        Divide (/)
+      </button>
+    </div>
+
+    <div id="result">Result will appear here...</div>
+  </body>
+</html>

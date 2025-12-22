@@ -21,6 +21,10 @@ func main() {
 	handler := slog.NewTextHandler(file, &slog.HandlerOptions{})
 	logger := slog.New(handler)
 	// Endpoints
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		logger.Info("Handling root request", slog.String("method", r.Method))
+		http.ServeFile(w, r, "views/index.html")
+	})
 	http.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) {
 		logger.Info("Handling /add request", slog.String("method", r.Method))
 		handlers.AddHandler(w, r, logger)
