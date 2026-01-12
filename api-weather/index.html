@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Clima Go + SQLite</title>
@@ -11,9 +23,19 @@
         display: flex;
         justify-content: center;
         padding-top: 50px;
+        padding-bottom: 50px; /* Espaço extra no final */
       }
       .container {
-        width: 400px;
+        width: 450px; /* Aumentei um pouco para caber o mapa melhor */
+      }
+
+      /* Mapa */
+      #map {
+        height: 300px; /* Altura do mapa */
+        width: 100%;
+        margin-top: 20px;
+        border-radius: 8px;
+        z-index: 1; /* Garante que fique no lugar certo */
       }
 
       /* Card Principal */
@@ -95,9 +117,6 @@
         align-items: center;
         font-size: 0.9rem;
       }
-      li:last-child {
-        border-bottom: none;
-      }
       .hist-temp {
         font-weight: bold;
         color: #00add8;
@@ -113,9 +132,6 @@
         padding: 8px;
         width: 100%;
       }
-      .btn-delete:hover {
-        background-color: #cc0000;
-      }
     </style>
   </head>
   <body>
@@ -127,6 +143,8 @@
         <button onclick="buscarClima()">Ver Clima</button>
 
         <div id="resultado"></div>
+
+        <div id="map"></div>
       </div>
 
       <div class="history-section">
@@ -146,7 +164,6 @@
             🗑️ Limpar
           </button>
         </div>
-
         <ul id="lista-historico">
           <li>Carregando...</li>
         </ul>
@@ -154,6 +171,21 @@
     </div>
 
     <script>
+      // Variáveis globais para o Mapa
+      let map;
+      let marker;
+
+      // Inicializa o mapa assim que a página carrega (mas sem coordenadas ainda)
+      function initMap() {
+        // Cria o mapa centrado em lat/long 0,0 com zoom baixo (visão mundial)
+        map = L.map("map").setView([0, 0], 2);
+
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "© OpenStreetMap",
+        }).addTo(map);
+      }
+
       // 1. Função principal de busca
       async function buscarClima() {
         const lat = document.getElementById("lat").value;
@@ -163,7 +195,7 @@
         resDiv.innerHTML = "Carregando...";
 
         try {
-          // Chama o Backend (que vai buscar na OpenMeteo E salvar no Banco)
+          // Chama o Backend
           const response = await fetch(`/weather?lat=${lat}&long=${long}`);
 
           if (!response.ok) {
@@ -173,28 +205,49 @@
 
           const data = await response.json();
 
-          // Mostra o resultado atual
+          // Mostra o resultado texto
           resDiv.innerHTML = `
                 <div class="temp">${data.current_weather.temperature}°C</div>
                 <div class="details">Vento: ${data.current_weather.windspeed} km/h</div>
                 <div class="details">Lat: ${data.latitude} | Long: ${data.longitude}</div>
             `;
 
-          // ATUALIZA O HISTÓRICO IMEDIATAMENTE
+          // ATUALIZA O MAPA
+          atualizarMapa(data.latitude, data.longitude);
+
+          // ATUALIZA O HISTÓRICO
           carregarHistorico();
         } catch (error) {
           resDiv.innerHTML = `<span style='color:red'>Erro: ${error.message}</span>`;
         }
       }
 
-      // 2. Função para ler o histórico do banco
+      // Nova função para mover o mapa e colocar o pino
+      function atualizarMapa(lat, long) {
+        if (!map) return; // Segurança caso o mapa não tenha carregado
+
+        // Muda a visão do mapa para o local pesquisado (zoom 13)
+        map.setView([lat, long], 13);
+
+        // Se já existe um pino anterior, remove ele
+        if (marker) {
+          map.removeLayer(marker);
+        }
+
+        // Adiciona o novo pino
+        marker = L.marker([lat, long])
+          .addTo(map)
+          .bindPopup("Local pesquisado")
+          .openPopup();
+      }
+
+      // 2. Função para ler o histórico
       async function carregarHistorico() {
         try {
-          const response = await fetch("/history"); // Chama nossa rota Go
+          const response = await fetch("/history");
           const dados = await response.json();
-
           const lista = document.getElementById("lista-historico");
-          lista.innerHTML = ""; // Limpa a lista antes de desenhar
+          lista.innerHTML = "";
 
           if (!dados || dados.length === 0) {
             lista.innerHTML =
@@ -202,10 +255,9 @@
             return;
           }
 
-          dados.forEach((item) => {
+          // Inverte a ordem para o mais recente aparecer primeiro
+          dados.reverse().forEach((item) => {
             const li = document.createElement("li");
-
-            // Formata a data para ficar legível (PT-BR)
             const dataFormatada = new Date(item.timestamp).toLocaleString(
               "pt-BR"
             );
@@ -225,26 +277,23 @@
           console.error("Erro ao carregar histórico:", error);
         }
       }
-      // Chama o histórico assim que a página abre
-      window.onload = carregarHistorico;
 
       async function limparHistorico() {
         if (!confirm("Tem certeza que quer apagar tudo?")) return;
-
         try {
-          // Chama a rota nova usando o método DELETE
           const response = await fetch("/history/clear", { method: "DELETE" });
-
-          if (response.ok) {
-            // Se deu certo, recarrega a lista (que vai vir vazia)
-            carregarHistorico();
-          } else {
-            alert("Erro ao limpar histórico");
-          }
+          if (response.ok) carregarHistorico();
+          else alert("Erro ao limpar histórico");
         } catch (error) {
           console.error(error);
         }
       }
+
+      // Ao carregar a janela, inicia o histórico e cria o mapa vazio
+      window.onload = function () {
+        carregarHistorico();
+        initMap();
+      };
     </script>
   </body>
 </html>
