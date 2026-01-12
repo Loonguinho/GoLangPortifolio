@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clima Go + SQLite</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f2f5;
+        display: flex;
+        justify-content: center;
+        padding-top: 50px;
+      }
+      .container {
+        width: 400px;
+      }
+
+      /* Card Principal */
+      .card {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      h1 {
+        margin-top: 0;
+        color: #333;
+      }
+      input {
+        padding: 12px;
+        margin: 5px 0;
+        width: 85%;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 14px;
+      }
+      button {
+        background-color: #00add8;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 10px;
+        width: 92%;
+        transition: 0.3s;
+      }
+      button:hover {
+        background-color: #008cb0;
+      }
+
+      /* Resultado */
+      #resultado {
+        margin-top: 20px;
+        min-height: 50px;
+      }
+      .temp {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #333;
+      }
+      .details {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      /* Área do Histórico */
+      .history-section {
+        margin-top: 30px;
+        background: white;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+      .history-section h3 {
+        margin-top: 0;
+        color: #555;
+        font-size: 1.1rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      li {
+        padding: 10px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+      }
+      li:last-child {
+        border-bottom: none;
+      }
+      .hist-temp {
+        font-weight: bold;
+        color: #00add8;
+      }
+      .hist-time {
+        font-size: 0.75rem;
+        color: #999;
+      }
+      .btn-delete {
+        background-color: #ff4d4d;
+        margin-top: 10px;
+        font-size: 12px;
+        padding: 8px;
+        width: 100%;
+      }
+      .btn-delete:hover {
+        background-color: #cc0000;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1>🌤️ Clima Go</h1>
+        <input type="text" id="lat" placeholder="Latitude (ex: -23.55)" />
+        <input type="text" id="long" placeholder="Longitude (ex: -46.63)" />
+        <button onclick="buscarClima()">Ver Clima</button>
+
+        <div id="resultado"></div>
+      </div>
+
+      <div class="history-section">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <h3>📜 Histórico Completo</h3>
+          <button
+            onclick="limparHistorico()"
+            class="btn-delete"
+            style="width: auto"
+          >
+            🗑️ Limpar
+          </button>
+        </div>
+
+        <ul id="lista-historico">
+          <li>Carregando...</li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      // 1. Função principal de busca
+      async function buscarClima() {
+        const lat = document.getElementById("lat").value;
+        const long = document.getElementById("long").value;
+        const resDiv = document.getElementById("resultado");
+
+        resDiv.innerHTML = "Carregando...";
+
+        try {
+          // Chama o Backend (que vai buscar na OpenMeteo E salvar no Banco)
+          const response = await fetch(`/weather?lat=${lat}&long=${long}`);
+
+          if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(errText);
+          }
+
+          const data = await response.json();
+
+          // Mostra o resultado atual
+          resDiv.innerHTML = `
+                <div class="temp">${data.current_weather.temperature}°C</div>
+                <div class="details">Vento: ${data.current_weather.windspeed} km/h</div>
+                <div class="details">Lat: ${data.latitude} | Long: ${data.longitude}</div>
+            `;
+
+          // ATUALIZA O HISTÓRICO IMEDIATAMENTE
+          carregarHistorico();
+        } catch (error) {
+          resDiv.innerHTML = `<span style='color:red'>Erro: ${error.message}</span>`;
+        }
+      }
+
+      // 2. Função para ler o histórico do banco
+      async function carregarHistorico() {
+        try {
+          const response = await fetch("/history"); // Chama nossa rota Go
+          const dados = await response.json();
+
+          const lista = document.getElementById("lista-historico");
+          lista.innerHTML = ""; // Limpa a lista antes de desenhar
+
+          if (!dados || dados.length === 0) {
+            lista.innerHTML =
+              "<li style='justify-content:center'>Nenhum histórico ainda.</li>";
+            return;
+          }
+
+          dados.forEach((item) => {
+            const li = document.createElement("li");
+
+            // Formata a data para ficar legível (PT-BR)
+            const dataFormatada = new Date(item.timestamp).toLocaleString(
+              "pt-BR"
+            );
+
+            li.innerHTML = `
+                    <div>
+                        Lat: ${item.latitude.toFixed(
+                          2
+                        )}, Long: ${item.longitude.toFixed(2)}
+                        <div class="hist-time">${dataFormatada}</div>
+                    </div>
+                    <div class="hist-temp">${item.temperature}°C</div>
+                `;
+            lista.appendChild(li);
+          });
+        } catch (error) {
+          console.error("Erro ao carregar histórico:", error);
+        }
+      }
+      // Chama o histórico assim que a página abre
+      window.onload = carregarHistorico;
+
+      async function limparHistorico() {
+        if (!confirm("Tem certeza que quer apagar tudo?")) return;
+
+        try {
+          // Chama a rota nova usando o método DELETE
+          const response = await fetch("/history/clear", { method: "DELETE" });
+
+          if (response.ok) {
+            // Se deu certo, recarrega a lista (que vai vir vazia)
+            carregarHistorico();
+          } else {
+            alert("Erro ao limpar histórico");
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    </script>
+  </body>
+</html>

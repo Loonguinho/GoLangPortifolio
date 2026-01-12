@@ -44,5 +44,5 @@ func main() {
 
 	fmt.Println("Local server running on :8080")
 	logger.Info("Server started", slog.String("address", ":8080"))
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8081", nil)
 }

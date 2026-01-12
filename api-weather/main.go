@@ -4,51 +4,81 @@ import (
     "fmt"
 	"net/http"
 	"encoding/json"
-	"time"
+	_ "embed"
+	"github.com/loonguinho/api-weather/weather"
 )
 
-type OpenMeteoResponse struct {
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
-	CurrentWeather CurrentWeather `json:"current_weather"`
-}
-
-type CurrentWeather struct {
-	Temperature float64 `json:"temperature"`
-	Windspeed   float64 `json:"windspeed"`
-	Winddirection float64 `json:"winddirection"`
-	Weathercode int     `json:"weathercode"`
-	IsDay       int     `json:"is_day"`
-	Time        string  `json:"time"`
-}
+//go:embed index.html
+var htmlContent []byte
 
 func main() {
+	weather.InitDB()
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+            http.NotFound(w, r)
+            return
+        }
+		w.Header().Set("Content-Type", "text/html")
+		w.Write(htmlContent)
+	})
+
 	http.HandleFunc("/weather", getWeatherHandler)
+	http.HandleFunc("/history", getHistoryHandler)
+	http.HandleFunc("/history/clear", clearHistoryHandler)
 	fmt.Println("Starting server on :8080")
+	
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		fmt.Println("Failed to start server:", err)
 	}
 }
 
 func getWeatherHandler(w http.ResponseWriter, r *http.Request) {
-	lat := "-23.55"
-	long := "-46.63"
-	//Build api link
-	url := fmt.Sprintf("https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&current_weather=true", lat, long)
-	fmt.Println("Fetching weather data from:", url)
-	client := &http.Client{Timeout: 60 * time.Second}
-	resp, err := client.Get(url)
-	if err != nil {
-		http.Error(w, "Failed to fetch weather data"+err.Error(), http.StatusInternalServerError)
+	lat := r.URL.Query().Get("lat")
+	long := r.URL.Query().Get("long")
+
+	if lat == "" || long == "" {
+		http.Error(w, "Latitude and longitude are required", http.StatusBadRequest)
 		return
 	}
-	defer resp.Body.Close()
 
-	var weatherResponse OpenMeteoResponse
-	if err := json.NewDecoder(resp.Body).Decode(&weatherResponse); err != nil {
-		http.Error(w, "Failed to parse weather data", http.StatusInternalServerError)
+	// Chamamos nosso novo pacote!
+	data, err := weather.GetForecast(lat, long)
+
+	if err != nil {
+		http.Error(w, "Erro ao buscar clima: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := weather.SaveWeatherRecord(lat, long, data.CurrentWeather.Temperature); err != nil {
+    	fmt.Println("⚠️ Erro ao salvar histórico:", err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func getHistoryHandler(w http.ResponseWriter, r *http.Request) {
+	records, err := weather.GetHistory()
+	if err != nil {
+		http.Error(w, "Erro ao buscar histórico: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(weatherResponse)}
+	json.NewEncoder(w).Encode(records)
+}
+
+func clearHistoryHandler(w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodDelete {
+        http.Error(w, "Método não permitido (use DELETE)", http.StatusMethodNotAllowed)
+        return
+    }
+
+    err := weather.ClearHistory()
+    if err != nil {
+        http.Error(w, "Erro ao limpar: "+err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte("Histórico limpo!"))
+}
