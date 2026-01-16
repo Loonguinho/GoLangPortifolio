@@ -7,7 +7,6 @@
       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
       crossorigin=""
     />
-
     <script
       src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
@@ -23,22 +22,22 @@
         display: flex;
         justify-content: center;
         padding-top: 50px;
-        padding-bottom: 50px; /* Espaço extra no final */
+        padding-bottom: 50px;
       }
       .container {
-        width: 450px; /* Aumentei um pouco para caber o mapa melhor */
+        width: 450px;
       }
 
-      /* Mapa */
+      /* Cursor de mira para indicar que pode clicar no mapa */
       #map {
-        height: 300px; /* Altura do mapa */
+        height: 300px;
         width: 100%;
         margin-top: 20px;
         border-radius: 8px;
-        z-index: 1; /* Garante que fique no lugar certo */
+        z-index: 1;
+        cursor: crosshair;
       }
 
-      /* Card Principal */
       .card {
         background: white;
         padding: 2rem;
@@ -73,8 +72,6 @@
       button:hover {
         background-color: #008cb0;
       }
-
-      /* Resultado */
       #resultado {
         margin-top: 20px;
         min-height: 50px;
@@ -88,8 +85,6 @@
         color: #666;
         font-size: 0.9rem;
       }
-
-      /* Área do Histórico */
       .history-section {
         margin-top: 30px;
         background: white;
@@ -138,12 +133,16 @@
     <div class="container">
       <div class="card">
         <h1>🌤️ Clima Go</h1>
+
+        <p style="font-size: 0.8rem; color: #777; margin-bottom: 10px">
+          Clique no mapa ou digite as coordenadas abaixo:
+        </p>
+
         <input type="text" id="lat" placeholder="Latitude (ex: -23.55)" />
         <input type="text" id="long" placeholder="Longitude (ex: -46.63)" />
         <button onclick="buscarClima()">Ver Clima</button>
 
         <div id="resultado"></div>
-
         <div id="map"></div>
       </div>
 
@@ -171,77 +170,73 @@
     </div>
 
     <script>
-      // Variáveis globais para o Mapa
       let map;
       let marker;
 
-      // Inicializa o mapa assim que a página carrega (mas sem coordenadas ainda)
       function initMap() {
-        // Cria o mapa centrado em lat/long 0,0 com zoom baixo (visão mundial)
+        // Inicia com visão global
         map = L.map("map").setView([0, 0], 2);
 
         L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 19,
           attribution: "© OpenStreetMap",
         }).addTo(map);
+
+        // --- NOVIDADE: CLIQUE NO MAPA ---
+        map.on("click", function (e) {
+          const lat = e.latlng.lat;
+          const lng = e.latlng.lng;
+
+          // Preenche os inputs
+          document.getElementById("lat").value = lat.toFixed(4);
+          document.getElementById("long").value = lng.toFixed(4);
+
+          // Move o pino visualmente
+          if (marker) map.removeLayer(marker);
+          marker = L.marker([lat, lng]).addTo(map);
+        });
       }
 
-      // 1. Função principal de busca
       async function buscarClima() {
         const lat = document.getElementById("lat").value;
         const long = document.getElementById("long").value;
         const resDiv = document.getElementById("resultado");
 
+        if (!lat || !long) {
+          alert("Por favor, clique no mapa ou digite as coordenadas.");
+          return;
+        }
+
         resDiv.innerHTML = "Carregando...";
 
         try {
-          // Chama o Backend
           const response = await fetch(`/weather?lat=${lat}&long=${long}`);
-
-          if (!response.ok) {
-            const errText = await response.text();
-            throw new Error(errText);
-          }
-
+          if (!response.ok) throw new Error(await response.text());
           const data = await response.json();
 
-          // Mostra o resultado texto
           resDiv.innerHTML = `
                 <div class="temp">${data.current_weather.temperature}°C</div>
                 <div class="details">Vento: ${data.current_weather.windspeed} km/h</div>
                 <div class="details">Lat: ${data.latitude} | Long: ${data.longitude}</div>
             `;
 
-          // ATUALIZA O MAPA
           atualizarMapa(data.latitude, data.longitude);
-
-          // ATUALIZA O HISTÓRICO
           carregarHistorico();
         } catch (error) {
           resDiv.innerHTML = `<span style='color:red'>Erro: ${error.message}</span>`;
         }
       }
 
-      // Nova função para mover o mapa e colocar o pino
       function atualizarMapa(lat, long) {
-        if (!map) return; // Segurança caso o mapa não tenha carregado
-
-        // Muda a visão do mapa para o local pesquisado (zoom 13)
-        map.setView([lat, long], 13);
-
-        // Se já existe um pino anterior, remove ele
-        if (marker) {
-          map.removeLayer(marker);
-        }
-
-        // Adiciona o novo pino
+        if (!map) return;
+        map.setView([lat, long], 13); // Zoom mais próximo ao buscar
+        if (marker) map.removeLayer(marker);
         marker = L.marker([lat, long])
           .addTo(map)
-          .bindPopup("Local pesquisado")
+          .bindPopup(`<b>${lat}, ${long}</b><br>Temperatura Atual`)
           .openPopup();
       }
 
-      // 2. Função para ler o histórico
       async function carregarHistorico() {
         try {
           const response = await fetch("/history");
@@ -255,13 +250,11 @@
             return;
           }
 
-          // Inverte a ordem para o mais recente aparecer primeiro
           dados.reverse().forEach((item) => {
             const li = document.createElement("li");
             const dataFormatada = new Date(item.timestamp).toLocaleString(
               "pt-BR"
             );
-
             li.innerHTML = `
                     <div>
                         Lat: ${item.latitude.toFixed(
@@ -274,22 +267,20 @@
             lista.appendChild(li);
           });
         } catch (error) {
-          console.error("Erro ao carregar histórico:", error);
-        }
-      }
-
-      async function limparHistorico() {
-        if (!confirm("Tem certeza que quer apagar tudo?")) return;
-        try {
-          const response = await fetch("/history/clear", { method: "DELETE" });
-          if (response.ok) carregarHistorico();
-          else alert("Erro ao limpar histórico");
-        } catch (error) {
           console.error(error);
         }
       }
 
-      // Ao carregar a janela, inicia o histórico e cria o mapa vazio
+      async function limparHistorico() {
+        if (!confirm("Apagar tudo?")) return;
+        try {
+          await fetch("/history/clear", { method: "DELETE" });
+          carregarHistorico();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
       window.onload = function () {
         carregarHistorico();
         initMap();
