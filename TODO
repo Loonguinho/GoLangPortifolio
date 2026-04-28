@@ -1,0 +1,31 @@
+1. api-calculator: A clean implementation of a REST API using the standard library. You're already using log/slog for structured logging and have a modular handler structure.
+2. api-weather: Shows more complexity by consuming external APIs, using go:embed for static assets, and persisting data with SQLite.
+3. todo-list: A well-structured CLI application utilizing cobra, which is the industry standard for Go CLIs.
+
+Roadmap for Advanced Go Features
+
+To level up, I recommend focusing on these four areas:
+
+1. Concurrency (Goroutines & Channels)
+   Your current projects are mostly synchronous.
+
+- Next Move: In api-weather, create a "Bulk Weather" endpoint that fetches data for 5+ cities simultaneously using Goroutines and sync.WaitGroup or golang.org/x/sync/errgroup.
+- Concept: Learn how to manage multiple tasks and handle errors across concurrent processes.
+
+2. The context Package
+   I noticed your HTTP handlers and DB calls don't explicitly pass context.Context.
+
+- Next Move: Update api-weather to pass r.Context() to your database queries and outgoing HTTP requests.
+- Concept: This allows your server to stop processing if a user cancels the request, saving resources.
+
+3. Interfaces & Dependency Injection
+   Currently, your logic is tightly coupled to concrete implementations (like SQLite).
+
+- Next Move: Define a WeatherStore interface in api-weather. Refactor your code so the handlers depend on the interface rather than the weather package directly.
+- Concept: This makes your code much easier to test and allows you to swap your database for a Mock or a different DB (like Postgres) without changing your business logic.
+
+4. Middlewares & Robust Routing
+   In api-calculator, you're logging manually in every handler.
+
+- Next Move: Implement a custom Middleware function that wraps your handlers to provide automatic logging and recovery from panics.
+- Concept: Learn the "Adapter" pattern and how to build reusable layers for your web services.
