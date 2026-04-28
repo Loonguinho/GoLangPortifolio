@@ -1,299 +1,240 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-      crossorigin=""
-    />
-
-    <script
-      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-      crossorigin=""
-    ></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Clima Go + SQLite</title>
+    <title>Clima Go - Pro Dashboard</title>
     <style>
+      :root {
+        --primary: #00add8;
+        --secondary: #6c757d;
+        --bg: #f8f9fa;
+        --card-bg: #ffffff;
+        --day: #ff9800;
+        --night: #3f51b5;
+        --error: #f44336;
+      }
       body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f0f2f5;
-        display: flex;
-        justify-content: center;
-        padding-top: 50px;
-        padding-bottom: 50px; /* Espaço extra no final */
-      }
-      .container {
-        width: 450px; /* Aumentei um pouco para caber o mapa melhor */
-      }
-
-      /* Mapa */
-      #map {
-        height: 300px; /* Altura do mapa */
-        width: 100%;
-        margin-top: 20px;
-        border-radius: 8px;
-        z-index: 1; /* Garante que fique no lugar certo */
-      }
-
-      /* Card Principal */
-      .card {
-        background: white;
-        padding: 2rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        text-align: center;
-      }
-      h1 {
-        margin-top: 0;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background-color: var(--bg);
         color: #333;
-      }
-      input {
-        padding: 12px;
-        margin: 5px 0;
-        width: 85%;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        font-size: 14px;
-      }
-      button {
-        background-color: #00add8;
-        color: white;
-        border: none;
-        padding: 12px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 16px;
-        margin-top: 10px;
-        width: 92%;
-        transition: 0.3s;
-      }
-      button:hover {
-        background-color: #008cb0;
-      }
-
-      /* Resultado */
-      #resultado {
-        margin-top: 20px;
-        min-height: 50px;
-      }
-      .temp {
-        font-size: 3rem;
-        font-weight: bold;
-        color: #333;
-      }
-      .details {
-        color: #666;
-        font-size: 0.9rem;
-      }
-
-      /* Área do Histórico */
-      .history-section {
-        margin-top: 30px;
-        background: white;
-        padding: 1rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-      }
-      .history-section h3 {
-        margin-top: 0;
-        color: #555;
-        font-size: 1.1rem;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 10px;
-      }
-      ul {
-        list-style: none;
-        padding: 0;
         margin: 0;
-      }
-      li {
-        padding: 10px;
-        border-bottom: 1px solid #f0f0f0;
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
         align-items: center;
-        font-size: 0.9rem;
+        padding: 20px;
       }
-      .hist-temp {
-        font-weight: bold;
-        color: #00add8;
+      .container { width: 100%; max-width: 600px; }
+      .tabs { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; }
+      .tab {
+        flex: 1; padding: 12px; text-align: center; background: #ddd;
+        border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s;
       }
-      .hist-time {
-        font-size: 0.75rem;
-        color: #999;
+      .tab.active { background: var(--primary); color: white; }
+      .card {
+        background: var(--card-bg); padding: 25px; border-radius: 12px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); margin-bottom: 20px;
       }
-      .btn-delete {
-        background-color: #ff4d4d;
-        margin-top: 10px;
-        font-size: 12px;
-        padding: 8px;
-        width: 100%;
+      .hidden { display: none; }
+      .input-group { margin-bottom: 15px; }
+      .input-row { display: flex; gap: 10px; margin-top: 5px; }
+      input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; width: 100%; box-sizing: border-box; }
+      button {
+        background: var(--primary); color: white; border: none; padding: 12px 20px;
+        border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold;
       }
+      button:hover { opacity: 0.9; }
+      #map { height: 250px; border-radius: 8px; margin-top: 15px; }
+
+      /* Unified Weather Result Card */
+      .weather-result {
+        border-left: 5px solid var(--primary);
+        padding: 15px; margin-top: 15px; background: #f8f9fa;
+        border-radius: 0 8px 8px 0; display: flex; justify-content: space-between; align-items: center;
+      }
+      .weather-result.error { border-left-color: var(--error); }
+      .weather-info strong { font-size: 1.1rem; display: block; }
+      .weather-info small { color: #666; font-size: 0.75rem; }
+      .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; color: white; }
+      .status-day { background-color: var(--day); }
+      .status-night { background-color: var(--night); }
+
+      /* Modal Styles */
+      .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); display: flex; justify-content: center;
+        align-items: center; z-index: 1000; visibility: hidden; opacity: 0; transition: 0.3s;
+      }
+      .modal-overlay.show { visibility: visible; opacity: 1; }
+      .modal-content {
+        background: white; width: 90%; max-width: 500px; max-height: 80vh;
+        border-radius: 12px; padding: 25px; overflow-y: auto; position: relative;
+      }
+      .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+      .close-modal { font-size: 24px; cursor: pointer; color: #666; }
+
+      .history-btn {
+        position: fixed; bottom: 20px; right: 20px; background: #333;
+        color: white; padding: 15px 25px; border-radius: 50px; cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 900;
+      }
+
+      .city-item { background: #f1f3f5; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
     </style>
   </head>
   <body>
     <div class="container">
-      <div class="card">
-        <h1>🌤️ Clima Go</h1>
-        <input type="text" id="lat" placeholder="Latitude (ex: -23.55)" />
-        <input type="text" id="long" placeholder="Longitude (ex: -46.63)" />
-        <button onclick="buscarClima()">Ver Clima</button>
+      <h1>🌤️ Weather Dashboard</h1>
+      
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('single')">Smart Search</div>
+        <div class="tab" onclick="switchTab('bulk')">Concurrent Bulk</div>
+      </div>
 
+      <div id="single-section" class="card">
+        <h3>City Lookup</h3>
+        <div class="input-group">
+          <input type="text" id="s-name" placeholder="Enter City Name" />
+          <div class="input-row"><input type="text" id="lat" placeholder="Lat (Opt)" /><input type="text" id="long" placeholder="Long (Opt)" /></div>
+        </div>
+        <button onclick="buscarClima()">Check Weather</button>
         <div id="resultado"></div>
-
         <div id="map"></div>
       </div>
 
-      <div class="history-section">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          "
-        >
-          <h3>📜 Histórico Completo</h3>
-          <button
-            onclick="limparHistorico()"
-            class="btn-delete"
-            style="width: auto"
-          >
-            🗑️ Limpar
-          </button>
+      <div id="bulk-section" class="card hidden">
+        <h3>Bulk Search</h3>
+        <div id="bulk-list">
+          <div class="city-item">
+            <input type="text" class="b-name" placeholder="City Name" value="São Paulo">
+            <div class="input-row"><input type="text" class="b-lat" placeholder="Lat (Opt)" value="-23.55"><input type="text" class="b-long" placeholder="Long (Opt)" value="-46.63"></div>
+          </div>
+          <div class="city-item"><input type="text" class="b-name" placeholder="City Name" value="New York"><div class="input-row"><input type="text" class="b-lat" placeholder="Lat (Opt)"><input type="text" class="b-long" placeholder="Long (Opt)"></div></div>
         </div>
-        <ul id="lista-historico">
-          <li>Carregando...</li>
-        </ul>
+        <button onclick="addCityRow()" style="background: var(--secondary); margin-bottom: 10px;">+ Add City</button>
+        <button onclick="fetchBulk()">Fetch Concurrently</button>
+        <div id="bulk-results"></div>
+      </div>
+    </div>
+
+    <div class="history-btn" onclick="openHistory()">📜 View History</div>
+
+    <!-- History Modal -->
+    <div id="history-modal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Search History</h3>
+          <span class="close-modal" onclick="closeHistory()">&times;</span>
+        </div>
+        <button onclick="limparHistorico()" style="background: var(--error); margin-bottom: 20px; font-size: 14px; padding: 8px;">🗑️ Clear All Records</button>
+        <div id="lista-historico"></div>
       </div>
     </div>
 
     <script>
-      // Variáveis globais para o Mapa
-      let map;
-      let marker;
+      let map, marker;
 
-      // Inicializa o mapa assim que a página carrega (mas sem coordenadas ainda)
-      function initMap() {
-        // Cria o mapa centrado em lat/long 0,0 com zoom baixo (visão mundial)
-        map = L.map("map").setView([0, 0], 2);
-
-        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          maxZoom: 19,
-          attribution: "© OpenStreetMap",
-        }).addTo(map);
+      function createWeatherCard(name, temp, lat, long, isDay, error) {
+        if (error) return `<div class="weather-result error"><strong>${name}</strong>: ${error}</div>`;
+        const statusClass = isDay === 1 ? 'status-day' : 'status-night';
+        const statusLabel = isDay === 1 ? '☀️ Day' : '🌙 Night';
+        return `
+          <div class="weather-result">
+            <div class="weather-info">
+              <strong>${name || 'Result'}</strong>
+              <span>${temp}°C</span>
+              <br><small>${lat}, ${long}</small>
+            </div>
+            <div class="status-badge ${statusClass}">${statusLabel}</div>
+          </div>
+        `;
       }
 
-      // 1. Função principal de busca
+      function switchTab(type) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('single-section').classList.add('hidden');
+        document.getElementById('bulk-section').classList.add('hidden');
+        if (type === 'single') {
+          document.querySelectorAll('.tab')[0].classList.add('active');
+          document.getElementById('single-section').classList.remove('hidden');
+          if (map) setTimeout(() => map.invalidateSize(), 100);
+        } else {
+          document.querySelectorAll('.tab')[1].classList.add('active');
+          document.getElementById('bulk-section').classList.remove('hidden');
+        }
+      }
+
+      function openHistory() {
+        document.getElementById('history-modal').classList.add('show');
+        carregarHistorico();
+      }
+      function closeHistory() { document.getElementById('history-modal').classList.remove('show'); }
+
+      function addCityRow() {
+        const div = document.createElement('div');
+        div.className = 'city-item';
+        div.innerHTML = `<input type="text" class="b-name" placeholder="City Name"><div class="input-row"><input type="text" class="b-lat" placeholder="Lat (Opt)"><input type="text" class="b-long" placeholder="Long (Opt)"></div>`;
+        document.getElementById('bulk-list').appendChild(div);
+      }
+
       async function buscarClima() {
-        const lat = document.getElementById("lat").value;
-        const long = document.getElementById("long").value;
-        const resDiv = document.getElementById("resultado");
-
-        resDiv.innerHTML = "Carregando...";
-
+        const name = document.getElementById('s-name').value;
+        const lat = document.getElementById('lat').value;
+        const long = document.getElementById('long').value;
+        const resDiv = document.getElementById('resultado');
+        resDiv.innerHTML = "Fetching...";
         try {
-          // Chama o Backend
-          const response = await fetch(`/weather?lat=${lat}&long=${long}`);
+          const response = await fetch(`/weather?name=${encodeURIComponent(name)}&lat=${lat}&long=${long}`);
+          if (!response.ok) throw new Error(await response.text());
+          const d = await response.json();
+          resDiv.innerHTML = createWeatherCard(name || "Search Result", d.current_weather.temperature, d.latitude, d.longitude, d.current_weather.is_day);
+          if (!map) initMap();
+          map.setView([d.latitude, d.longitude], 10);
+          if (marker) map.removeLayer(marker);
+          marker = L.marker([d.latitude, d.longitude]).addTo(map);
+        } catch (e) { resDiv.innerHTML = `<div class='weather-result error'>${e.message}</div>`; }
+      }
 
-          if (!response.ok) {
-            const errText = await response.text();
-            throw new Error(errText);
-          }
-
+      async function fetchBulk() {
+        const rows = document.querySelectorAll('.city-item');
+        const cities = Array.from(rows).map(r => ({ name: r.querySelector('.b-name').value, lat: r.querySelector('.b-lat').value, long: r.querySelector('.b-long').value })).filter(c => c.name || (c.lat && c.long));
+        const resDiv = document.getElementById('bulk-results');
+        resDiv.innerHTML = "Fetching...";
+        try {
+          const response = await fetch('/bulk', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(cities) });
           const data = await response.json();
-
-          // Mostra o resultado texto
-          resDiv.innerHTML = `
-                <div class="temp">${data.current_weather.temperature}°C</div>
-                <div class="details">Vento: ${data.current_weather.windspeed} km/h</div>
-                <div class="details">Lat: ${data.latitude} | Long: ${data.longitude}</div>
-            `;
-
-          // ATUALIZA O MAPA
-          atualizarMapa(data.latitude, data.longitude);
-
-          // ATUALIZA O HISTÓRICO
-          carregarHistorico();
-        } catch (error) {
-          resDiv.innerHTML = `<span style='color:red'>Erro: ${error.message}</span>`;
-        }
-      }
-
-      // Nova função para mover o mapa e colocar o pino
-      function atualizarMapa(lat, long) {
-        if (!map) return; // Segurança caso o mapa não tenha carregado
-
-        // Muda a visão do mapa para o local pesquisado (zoom 13)
-        map.setView([lat, long], 13);
-
-        // Se já existe um pino anterior, remove ele
-        if (marker) {
-          map.removeLayer(marker);
-        }
-
-        // Adiciona o novo pino
-        marker = L.marker([lat, long])
-          .addTo(map)
-          .bindPopup("Local pesquisado")
-          .openPopup();
-      }
-
-      // 2. Função para ler o histórico
-      async function carregarHistorico() {
-        try {
-          const response = await fetch("/history");
-          const dados = await response.json();
-          const lista = document.getElementById("lista-historico");
-          lista.innerHTML = "";
-
-          if (!dados || dados.length === 0) {
-            lista.innerHTML =
-              "<li style='justify-content:center'>Nenhum histórico ainda.</li>";
-            return;
-          }
-
-          // Inverte a ordem para o mais recente aparecer primeiro
-          dados.reverse().forEach((item) => {
-            const li = document.createElement("li");
-            const dataFormatada = new Date(item.timestamp).toLocaleString(
-              "pt-BR"
-            );
-
-            li.innerHTML = `
-                    <div>
-                        Lat: ${item.latitude.toFixed(
-                          2
-                        )}, Long: ${item.longitude.toFixed(2)}
-                        <div class="hist-time">${dataFormatada}</div>
-                    </div>
-                    <div class="hist-temp">${item.temperature}°C</div>
-                `;
-            lista.appendChild(li);
+          resDiv.innerHTML = "";
+          data.forEach(res => {
+            if (res.error) resDiv.innerHTML += createWeatherCard(res.name, null, null, null, null, res.error);
+            else resDiv.innerHTML += createWeatherCard(res.name, res.weather.current_weather.temperature, res.weather.latitude, res.weather.longitude, res.weather.current_weather.is_day);
           });
-        } catch (error) {
-          console.error("Erro ao carregar histórico:", error);
-        }
+        } catch (e) { resDiv.innerHTML = "Error: " + e.message; }
+      }
+
+      async function carregarHistorico() {
+        const response = await fetch("/history");
+        const data = await response.json();
+        const div = document.getElementById("lista-historico");
+        div.innerHTML = data.length ? "" : "<p>No history yet.</p>";
+        data.forEach(item => {
+          div.innerHTML += createWeatherCard(item.name, item.temperature, item.latitude.toFixed(2), item.longitude.toFixed(2), item.is_day);
+        });
       }
 
       async function limparHistorico() {
-        if (!confirm("Tem certeza que quer apagar tudo?")) return;
-        try {
-          const response = await fetch("/history/clear", { method: "DELETE" });
-          if (response.ok) carregarHistorico();
-          else alert("Erro ao limpar histórico");
-        } catch (error) {
-          console.error(error);
+        if (confirm("Delete all history?")) {
+          await fetch("/history/clear", { method: "DELETE" });
+          carregarHistorico();
         }
       }
 
-      // Ao carregar a janela, inicia o histórico e cria o mapa vazio
-      window.onload = function () {
-        carregarHistorico();
-        initMap();
-      };
+      function initMap() {
+        map = L.map('map').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+      }
+      window.onload = () => { initMap(); };
     </script>
   </body>
 </html>
